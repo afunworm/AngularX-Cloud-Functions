@@ -103,7 +103,7 @@ db.listCollections()
         console.log(`Setting up additional info for AngularX Cloud Functions`);
         
         //Set up the basic denormalization of users
-        let info = { totalAccount: 1 };
+        let info = { totalAccounts: 1 };
         await db.collection('Users').doc('@info').set(info).catch(error => {
             console.log(`${chalk.red('Error encountered while installing AngularX Cloud Functions')}.`);
             console.log(error);
