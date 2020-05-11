@@ -1,0 +1,6 @@
+{
+    "admin": "UID of the super admin user. Get it from Firebase Authentication.",
+    "allowSignUp": false,
+    "serviceAccount": "Service Account JSON file name. Default to serviceAccount.json",
+    "databaseURL": "Can be found under Project Settings in Firebase Console > Service Account"
+}

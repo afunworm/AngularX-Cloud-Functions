@@ -1,0 +1,47 @@
+<html>
+
+    <head>
+        <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-analytics.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-firestore.js"></script>
+    </head>
+
+    <body>
+        <script type="text/javascript">
+
+            // Your web app's Firebase configuration
+            var firebaseConfig = {
+                apiKey: "AIzaSyDF7CYh1DWMSBZcmYATgksWISPe_NIKV0M",
+                authDomain: "angularx-299c1.firebaseapp.com",
+                databaseURL: "https://angularx-299c1.firebaseio.com",
+                projectId: "angularx-299c1",
+                storageBucket: "angularx-299c1.appspot.com",
+                messagingSenderId: "394180121813",
+                appId: "1:394180121813:web:7b024945858790fc1c3e5c"
+            };
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+
+            firebase.auth().signInWithEmailAndPassword('afunworm@gmail.com', 'secret30').catch(function(error) {
+                // Handle Errors here.
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                // ...
+            });
+
+            firebase.auth().onIdTokenChanged(function(user) {
+
+                if (user) {
+                    // User is signed in or token was refreshed.
+                    user.getIdToken().then((idToken) => {
+                        console.log(`ID Token is ${idToken}`);
+                    });
+                }
+
+            });
+
+        </script>
+    </body>
+
+</html>
