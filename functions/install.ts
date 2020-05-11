@@ -2,24 +2,23 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as chalk from 'chalk';
 import * as fs from 'fs';
-import { Storage } from '@google-cloud/storage';
 
 //Prerequisite - Does environment.js exist?
-if (!fs.existsSync('./environment/environment.js')) {
-    console.log(`Unable to find ${chalk.cyan('/functions/environment/environment.js')}.`);
+if (!fs.existsSync('./environments/environment.json')) {
+    console.log(`Unable to find ${chalk.cyan('/functions/environments/environment.json')}.`);
     console.log(`To set up your ${chalk.cyan('environment.js')}, copy and configure ${chalk.cyan('/functions/environment/environment.sample.js')}.`);
     process.exit();
 }
 
-const environment = require('./environment/environment.js');
+const environment = require('./environments/environment.json');
 
 if (admin.apps.length === 0) {
     
     console.log('Initializing Firebase Admin');
     admin.initializeApp({
-        credential: admin.credential.cert(require('./' + environment.SETTINGS.serviceAccount)),
-        databaseURL: environment.FIRESTORE.URL,
-        storageBucket: 'angularx-299c1.appspot.com'
+        credential: admin.credential.cert(require('./' + environment.serviceAccount)),
+        databaseURL: environment.databaseURL,
+        storageBucket: environment.storageBucket
     });
     console.log(`${chalk.greenBright('Done')}`);
 
@@ -30,10 +29,10 @@ const db = admin.firestore();
 const auth = admin.auth();
 const storage = admin.storage();
 
-//Prerequisite - Is environment.ADMIN set?
-if (!environment.ADMIN || typeof environment.ADMIN !== 'string') {
-    console.log(`${chalk.cyan('ADMIN')} must be configured inside your environment.js with the ADMIN's UID`);
-    console.log(`Please check your configuation for ${chalk.cyan('/functions/environment/environment.js')}`);
+//Prerequisite - Is environment.admin set?
+if (!environment.admin || typeof environment.admin !== 'string') {
+    console.log(`${chalk.cyan('admin')} must be configured inside your environment.js with the admin's UID`);
+    console.log(`Please check your configuation for ${chalk.cyan('/functions/environments/environment.json')}`);
     process.exit();
 }
 
@@ -49,6 +48,8 @@ if (!bucket.exists) {
 }
 
 function extractName(name: string) {
+
+    if (name === undefined || name === null) return { firstName: '', lastName: '' };
 
     if (name.indexOf(' ') == -1) return { firstName: name, lastName: '' };
 
@@ -73,18 +74,18 @@ db.listCollections()
 
     //Prerequisite - Is the UID provided correct?
     console.log('Checking if admin user exists in Firebase Authentication');
-    let adminId = environment.ADMIN;
+    let adminId = environment.admin;
     admin.auth().getUser(adminId).then(async (user) => {
         
         //Set up the basic Users in the database
         await db.collection('Users').doc(adminId).set({
             email: user.email,
-            displayName: user.displayName,
-            firstName: extractName(user.displayName).firstName,
-            lastName: extractName(user.displayName).lastName,
+            displayName: user.displayName || '',
+            firstName: extractName(user.displayName || '').firstName,
+            lastName: extractName(user.displayName || '').lastName,
             dob: false,
-            photoURL: user.photoURL,
-            phoneNumber: user.phoneNumber,
+            photoURL: user.photoURL || '',
+            phoneNumber: user.phoneNumber || '',
             permissions: {
                 create_user: true,
                 delete_user: true,
@@ -109,6 +110,7 @@ db.listCollections()
             process.exit();
         }).catch(error => {
             console.log(`${chalk.red('Unable to set up additional data in Firebase Firestore')}`);
+            console.log(error);
         });
 
         console.log(`${chalk.greenBright('AngularX Cloud Functions completed successfully')}`);
@@ -116,13 +118,15 @@ db.listCollections()
 
     }).catch(error => {
         console.log(`${chalk.red('Admin user id')} ${chalk.cyan(adminId)} ${chalk.red('does not exist in your Firebase Authentication')}`);
-        console.log(`${chalk.red('Please provide an existing admin user UID in your')} ${chalk.cyan('/functions/environment/environment.js')}`);
+        console.log(`${chalk.red('Please provide an existing admin user UID in your')} ${chalk.cyan('/functions/environments/environment.json')}`);
+        console.log(error);
         process.exit();
     });
 
-}).catch(() => {
+}).catch(error => {
     //Is the credential provided correct?
     console.log(`${chalk.red('Unable to connect to Firestore')}`);
-    console.log(`${chalk.red('Please make sure your Service Account\'s filename is properly configured under')} ${chalk.cyan('/functions/environment/environment.js')}`);
+    console.log(`${chalk.red('Please make sure your Service Account\'s filename is properly configured under')} ${chalk.cyan('/functions/environments/environment.json')}`);
+    console.log(error);
     process.exit();
 });
