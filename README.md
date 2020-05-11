@@ -18,6 +18,10 @@ Cloud Functions dependency for [AngularX](https://github.com/afunworm/AngularX).
 
 3. Make sure Cloud Functions is enabled from your Firebase Console.
 4. Configure `functions/environment/environment.json` by copying `environment.sample.json`
-5. From the `angularx-cloud-functions` folder:
+5. From the `angularx-cloud-functions` folder, run the following commands (do not overwrite any existing files):
+
+    $ firebase login
+
+    $ firebase init
 
     $ firebase deploy
