@@ -48,7 +48,6 @@ export default class CloudCore {
 
     //Is this user the admin of the app?
     isAdmin(): boolean {
-        console.log(`Comparing ${this.uid} and ${environment.admin}`);
         return this.uid === environment.admin;
     }
 

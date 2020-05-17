@@ -162,10 +162,14 @@ exports.onUserFirestoreUpdate = functions.firestore.document('Users/{userId}').o
         displayName: newValue.displayName
     };
 
-    if (newValue.photoURL.toString().toLowerCase().startsWith('http:') || newValue.photoURL.toString().toLowerCase().startsWith('https:'))
-        data.photoURL = newValue.photoURL;
-    else {
-        data.photoURL = null;
+    if (newValue.photoURL !== null) {
+
+        if (newValue.photoURL.toString().toLowerCase().startsWith('http:') || newValue.photoURL.toString().toLowerCase().startsWith('https:'))
+            data.photoURL = newValue.photoURL;
+        else {
+            data.photoURL = null;
+        }
+
     }
     
     return auth.updateUser(userId, data);
