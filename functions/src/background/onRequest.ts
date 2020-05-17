@@ -88,7 +88,7 @@ exports.onUserCreate = functions.auth.user().onCreate((user) => {
                 displayName: user.displayName,
                 firstName: extractName(user.displayName).firstName,
                 lastName: extractName(user.displayName).lastName,
-                dob: false,
+                dob: null,
                 photoURL: user.photoURL,
                 phoneNumber: user.phoneNumber,
                 permissions: {
