@@ -190,7 +190,7 @@ app.get('/:uid', (req: express.Request, res: express.Response) => {
     CC.init().then(async () => {
         
         //A user can get their own info
-        if (!CC.can('get_user') && uid !== CC.uid) {
+        if (!CC.can('read_user') && uid !== CC.uid) {
             res.status(400).json({'error': 'You are not allowed to access this route.'}).end();
             return;
         }
@@ -235,7 +235,7 @@ app.patch('/:uid', (req: express.Request, res: express.Response) => {
     CC.init().then(async () => {
         
         //A user can update their own info
-        if (!CC.can('edit_user') && uid !== CC.uid) {
+        if (!CC.can('update_user') && uid !== CC.uid) {
             res.status(400).json({'error': 'You are not allowed to edit this user.'}).end();
             return;
         }
@@ -338,7 +338,7 @@ app.patch('/:uid/custom', (req: express.Request, res: express.Response) => {
     CC.init().then(async () => {
         
         //A user can update their own info
-        if (!CC.can('edit_user') && uid !== CC.uid) {
+        if (!CC.can('update_user') && uid !== CC.uid) {
             res.status(400).json({'error': 'You are not allowed to edit this user.'}).end();
             return;
         }

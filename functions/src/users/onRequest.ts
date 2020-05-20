@@ -70,7 +70,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
 
     CC.init().then(async () => {
         
-        if (!CC.can('get_user')) {
+        if (!CC.can('read_user')) {
             res.status(400).json({'error': 'You are not allowed to access this route.'}).end();
             return;
         }

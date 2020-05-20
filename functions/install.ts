@@ -89,8 +89,8 @@ db.listCollections()
             permissions: {
                 create_user: true,
                 delete_user: true,
-                edit_user: true,
-                get_user: true,
+                update_user: true,
+                read_user: true,
                 manage_options: true
             }
         }).catch(error => {
