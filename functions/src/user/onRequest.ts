@@ -14,7 +14,8 @@ if (admin.apps.length === 0) {
     
     admin.initializeApp({
         credential: admin.credential.cert(require('../' + environment.serviceAccount)),
-        databaseURL: environment.databaseURL
+        databaseURL: environment.databaseURL,
+        storageBucket: environment.storageBucket
     });
 
 }

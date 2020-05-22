@@ -13,12 +13,14 @@ if (admin.apps.length === 0) {
     
     admin.initializeApp({
         credential: admin.credential.cert(require('../' + environment.serviceAccount)),
-        databaseURL: environment.databaseURL
+        databaseURL: environment.databaseURL,
+        storageBucket: environment.storageBucket
     });
 
 }
 const db = admin.firestore();
 const auth = admin.auth();
+const storage = admin.storage();
 
 /*-------------------------------------------------------*
  * EXPRESS
@@ -173,5 +175,75 @@ exports.onUserFirestoreUpdate = functions.firestore.document('Users/{userId}').o
     }
     
     return auth.updateUser(userId, data);
+
+});
+
+/*-------------------------------------------------------
+ * ON OBJECT UPLOADED TO STORAGE
+ *-------------------------------------------------------
+ * Extract custom metadata and create a reference doc
+ * in Firestore whenever an object is uploaded to the
+ * storage.
+ */
+exports.onObjectAdded = functions.storage.object().onFinalize(async (object) => {
+
+    const bucket = storage.bucket();
+    const file = bucket.file(object.name as string);
+
+    // Get a signed URL for the file
+    return file.getSignedUrl({ action: 'read', expires: '12-31-3011' }).then(result => {
+
+        const url = result[0];
+        let data = {
+            name: object.name,
+            extension: (object.name as string).split('.').pop(),
+            downloadUrl: url,
+            contentType: object.contentType,
+            size: Number(object.size),
+            _createdAt: admin.firestore.Timestamp.fromDate(new Date(object.timeCreated)),
+            ...object.metadata
+        };
+
+        //Add data to Firestore
+        if (object.metadata?.fileId) {
+            db.collection('Storage').doc(object.metadata.fileId).set(data).catch(error => console.log(error));
+        } else {
+            db.collection('Storage').add(data).catch(error => console.log(error));
+        }
+    });
+
+});
+
+
+/*-------------------------------------------------------
+ * ON OBJECT DELETED FROM STORAGE
+ *-------------------------------------------------------
+ * Remove data from Firestore whenever an object is 
+ * removed from storage
+ */
+exports.onObjectDeleted = functions.storage.object().onDelete(async (object) => {
+
+    if (object.metadata?.fileId) {
+        return db.collection('Storage').doc(object.metadata?.fileId).delete().catch(error => console.log(error));
+    }
+
+    return;
+
+});
+
+
+/*-------------------------------------------------------
+ * ON STORAGE ENTRY DELETE FROM FIRESTORE
+ *-------------------------------------------------------
+ * Remove corresponding object from storage when its
+ * entry is removed from Firestore
+ */
+exports.onUserFirestoreUpdate = functions.firestore.document('Storage/{fileId}').onDelete(async (snap, context) => { 
+
+    const deletedValue = snap.data() as any;
+    const bucket = storage.bucket();
+    const name = deletedValue.name;
+
+    return bucket.file(name).delete();
 
 });
