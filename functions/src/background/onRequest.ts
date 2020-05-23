@@ -200,13 +200,13 @@ exports.onObjectAdded = functions.storage.object().onFinalize(async (object) => 
         if (!('privacy' in metadata)) metadata.privacy = 'private';
 
         let data = {
-            name: object.name,
+            ...metadata, //Come first so other details can be overwritten
+            path: object.name,
             extension: (object.name as string).split('.').pop(),
             downloadUrl: url,
             contentType: object.contentType,
             size: Number(object.size),
-            _createdAt: admin.firestore.Timestamp.fromDate(new Date(object.timeCreated)),
-            ...metadata
+            _createdAt: admin.firestore.Timestamp.fromDate(new Date(object.timeCreated))
         };
 
         //Add data to Firestore
