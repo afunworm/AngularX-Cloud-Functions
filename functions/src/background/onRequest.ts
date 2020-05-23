@@ -194,6 +194,11 @@ exports.onObjectAdded = functions.storage.object().onFinalize(async (object) => 
     return file.getSignedUrl({ action: 'read', expires: '12-31-3011' }).then(result => {
 
         const url = result[0];
+        let metadata = object.metadata ? object.metadata : {};
+
+        //Set privacy
+        if (!('privacy' in metadata)) metadata.privacy = 'private';
+
         let data = {
             name: object.name,
             extension: (object.name as string).split('.').pop(),
@@ -201,7 +206,7 @@ exports.onObjectAdded = functions.storage.object().onFinalize(async (object) => 
             contentType: object.contentType,
             size: Number(object.size),
             _createdAt: admin.firestore.Timestamp.fromDate(new Date(object.timeCreated)),
-            ...object.metadata
+            ...metadata
         };
 
         //Add data to Firestore
